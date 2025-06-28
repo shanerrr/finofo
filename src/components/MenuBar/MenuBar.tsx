@@ -73,6 +73,7 @@ export default function MenuBar({
             {GROUP_BY_OPTIONS.map((option) => (
               <MenubarCheckboxItem
                 disabled={isTableView}
+                hidden={option.hidden}
                 key={option.value}
                 checked={groupBy === option.value}
                 onClick={() => handleUpdateGroup(option.value)}

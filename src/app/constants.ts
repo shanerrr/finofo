@@ -1,15 +1,23 @@
 export const GROUP_BY_OPTIONS = [
   {
+    label: "None",
+    value: "none",
+    hidden: true,
+  },
+  {
     label: "Family",
     value: "family",
+    hidden: false,
   },
   {
     label: "Order",
     value: "order",
+    hidden: false,
   },
   {
     label: "Genus",
     value: "genus",
+    hidden: false,
   },
 ] as const;
 

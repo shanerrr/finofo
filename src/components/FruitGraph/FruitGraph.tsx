@@ -94,7 +94,7 @@ export default function FruitGraph({ selectedFruits }: FruitGraphProps) {
 
   return (
     <Card className="flex flex-col h-full gap-0">
-      <CardHeader className="items-center pb-2">
+      <CardHeader className="items-center">
         <CardTitle className="text-center">
           Pie Chart of Your Fruit Jar
         </CardTitle>
