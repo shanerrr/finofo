@@ -41,3 +41,30 @@ export const sortGroupedFruits = (
 export const formatItemCount = (count: number): string => {
   return `${count} item${count !== 1 ? "s" : ""}`;
 };
+
+/**
+ * Generates a deterministic colour based on a string input
+ * @param str - String to generate color from
+ * @param format - rgb or hex
+ * @returns a hex or rgb colour property
+ */
+export const generateDeterministicColour = (str: string, format = "rgb") => {
+  let hash = 2;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash;
+  }
+
+  const r = Math.abs(hash) % 256;
+  const g = Math.abs(hash >> 8) % 256;
+  const b = Math.abs(hash >> 16) % 256;
+
+  if (format === "hex") {
+    return `#${r.toString(16).padStart(2, "0")}${g
+      .toString(16)
+      .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+  }
+
+  return `rgb(${r}, ${g}, ${b})`;
+};

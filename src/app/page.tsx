@@ -1,5 +1,4 @@
 import FruitList from "@/components/FruitList/FruitList";
-import ViewToggleGroup from "@/components/ViewToggleGroup/ViewToggleGroup";
 import MenuBar from "@/components/MenuBar/MenuBar";
 
 import {
@@ -12,6 +11,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { getFruits } from "@/lib/data";
 import FruitTable from "@/components/FruitTable/FruitTable";
 import { SearchParams } from "./types";
+import FruitJar from "@/components/FruitJar/FruitJar";
+import FruitGraph from "@/components/FruitGraph/FruitGraph";
 
 export default async function Home({
   searchParams,
@@ -26,18 +27,56 @@ export default async function Home({
 
   //todo layout cookies
 
+  const selectedFruits = [
+    {
+      name: "Persimmon",
+      id: 52,
+      family: "Ebenaceae",
+      order: "Rosales",
+      genus: "Diospyros",
+      nutritions: {
+        calories: 81,
+        fat: 0,
+        sugar: 18,
+        carbohydrates: 18,
+        protein: 0,
+      },
+    },
+    {
+      name: "Strawberry",
+      id: 3,
+      family: "Rosaceae",
+      order: "Rosales",
+      genus: "Fragaria",
+      nutritions: {
+        calories: 29,
+        fat: 0.4,
+        sugar: 5.4,
+        carbohydrates: 5.5,
+        protein: 0.8,
+      },
+    },
+    {
+      name: "Banana",
+      id: 1,
+      family: "Musaceae",
+      order: "Zingiberales",
+      genus: "Musa",
+      nutritions: {
+        calories: 96,
+        fat: 0.2,
+        sugar: 17.2,
+        carbohydrates: 22,
+        protein: 1,
+      },
+    },
+  ];
+
   return (
     <main className="container mx-auto h-screen flex flex-col gap-4 py-8">
-      <header>
-        <h1 className="scroll-m-20 text-center text-4xl font-extrabold tracking-tight text-balance">
-          I ❤️ Fruits!
-        </h1>
-        <p className="text-center text-sm text-muted-foreground">by Shane</p>
-      </header>
-      <section className="flex gap-4">
-        <ViewToggleGroup />
+      <header className="w-max">
         <MenuBar />
-      </section>
+      </header>
       <ResizablePanelGroup direction="horizontal" className="h-full flex-1">
         <ResizablePanel
           className="h-full"
@@ -55,9 +94,15 @@ export default async function Home({
         </ResizablePanel>
         <ResizableHandle withHandle className="mx-4 -z-10" />
         <ResizablePanel className="h-full" defaultSize={isTableView ? 40 : 75}>
-          <h1 className="scroll-m-20 text-center text-4xl font-extrabold tracking-tight text-balance">
-            Fruit Jar
-          </h1>
+          <ResizablePanelGroup direction="vertical">
+            <ResizablePanel defaultSize={50} maxSize={75} minSize={50}>
+              <FruitJar selectedFruits={fruits} />
+            </ResizablePanel>
+            <ResizableHandle withHandle className="my-4" />
+            <ResizablePanel defaultSize={50} maxSize={50} minSize={25}>
+              <FruitGraph selectedFruits={fruits} />
+            </ResizablePanel>
+          </ResizablePanelGroup>
         </ResizablePanel>
       </ResizablePanelGroup>
     </main>

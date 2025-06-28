@@ -13,14 +13,19 @@ import {
   MenubarSubContent,
   MenubarSubTrigger,
   MenubarTrigger,
+  MenubarCheckboxItem,
 } from "@/components/ui/menubar";
 
 import { GROUP_BY_OPTIONS } from "@/app/constants";
-import { GroupBy } from "@/app/types";
+import { GroupBy, View } from "@/app/types";
 
 export default function MenuBar() {
   const searchParams = useSearchParams();
-  // const groupByParam = searchParams.get("groupBy")?.toLowerCase();
+  const groupByParam = searchParams.get("groupBy")?.toLowerCase();
+
+  //get param from url and defaults to list view.
+  const view: View =
+    searchParams.get("view")?.toLowerCase() === "table" ? "table" : "list";
 
   // disabling grouping when in table view.
   const isTableView = searchParams.get("view")?.toLowerCase() === "table";
@@ -42,36 +47,56 @@ export default function MenuBar() {
     window.history.pushState(null, "", `?${params.toString()}`);
   };
 
+  const handleUpdateView = (newView: View) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("view", newView);
+    window.history.pushState(null, "", `?${params.toString()}`);
+  };
+
   return (
     <Menubar>
       <MenubarMenu>
-        <MenubarTrigger>Fruits</MenubarTrigger>
+        <MenubarTrigger>View</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem>Add New Fruit</MenubarItem>
+          <MenubarCheckboxItem
+            checked={!isTableView}
+            onClick={() => handleUpdateView("list")}
+          >
+            List View
+          </MenubarCheckboxItem>
+          <MenubarCheckboxItem
+            checked={isTableView}
+            onClick={() => handleUpdateView("table")}
+          >
+            Table View
+          </MenubarCheckboxItem>
         </MenubarContent>
       </MenubarMenu>
       <MenubarMenu>
-        <MenubarTrigger disabled={isTableView} className="disabled:opacity-10">
-          Group
+        <MenubarTrigger className="disabled:opacity-10">
+          Grouping
         </MenubarTrigger>
         <MenubarContent>
-          <MenubarSub>
-            <MenubarSubTrigger>Group</MenubarSubTrigger>
-            <MenubarSubContent>
-              {GROUP_BY_OPTIONS.map((option) => (
-                <MenubarItem
-                  key={option.value}
-                  onClick={() => handleUpdateGroup(option.value)}
-                >
-                  Group by {option.label}
-                </MenubarItem>
-              ))}
-            </MenubarSubContent>
-          </MenubarSub>
-          <MenubarSeparator />
-          <MenubarItem onClick={() => handleUpdateGroup("none")}>
-            Clear Grouping
-          </MenubarItem>
+          <>
+            {GROUP_BY_OPTIONS.map((option) => (
+              <MenubarCheckboxItem
+                disabled={isTableView}
+                key={option.value}
+                checked={groupByParam === option.value}
+                onClick={() => handleUpdateGroup(option.value)}
+              >
+                Group by {option.label}
+              </MenubarCheckboxItem>
+            ))}
+            <MenubarSeparator />
+            <MenubarCheckboxItem
+              disabled={isTableView}
+              checked={groupByParam === "none"}
+              onClick={() => handleUpdateGroup("none")}
+            >
+              No Grouping
+            </MenubarCheckboxItem>
+          </>
         </MenubarContent>
       </MenubarMenu>
     </Menubar>
