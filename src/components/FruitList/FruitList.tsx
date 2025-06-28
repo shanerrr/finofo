@@ -9,6 +9,7 @@ import { cn } from "@/utils/classNames";
 import { groupFruits, sortGroupedFruits, formatItemCount } from "@/utils/fruit";
 
 import type { Fruit, GroupBy } from "@/app/types";
+import { DEFAULT_GROUP_BY } from "@/app/constants";
 import { Card, CardContent } from "../ui/card";
 import { Table, TableBody, TableCell, TableRow } from "../ui/table";
 
@@ -73,7 +74,7 @@ const GroupRow = memo(
               <TableCell className="text-center text-sm bg-background p-0">
                 <Button
                   variant="link"
-                  aria-label="Add new item to this group"
+                  aria-label={`Add all ${groupFruits.length} items from ${groupName} group`}
                   className="w-full cursor-pointer"
                   onClick={handleGroupAdd}
                 >
@@ -123,7 +124,7 @@ const FruitList = memo(
       [onFruitGroupAdd]
     );
 
-    if (groupBy === "none") {
+    if (groupBy === DEFAULT_GROUP_BY) {
       return (
         <Card className="p-0">
           <CardContent className="p-0">

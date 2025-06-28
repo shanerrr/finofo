@@ -1,4 +1,5 @@
 import type { Fruit, GroupBy } from "@/app/types";
+import { DEFAULT_GROUP_BY } from "@/app/constants";
 
 /**
  * Groups fruits by the specified property
@@ -10,7 +11,7 @@ export const groupFruits = (
   fruits: Fruit[],
   groupBy: GroupBy
 ): Record<string, Fruit[]> => {
-  if (groupBy === "none") return {};
+  if (groupBy === DEFAULT_GROUP_BY) return {};
 
   return fruits.reduce((acc, fruit) => {
     const groupKey = fruit[groupBy];
@@ -48,7 +49,7 @@ export const formatItemCount = (count: number): string => {
  * @param format - rgb or hex
  * @returns a hex or rgb colour property
  */
-export const generateDeterministicColour = (str: string, format = "rgb") => {
+export const generateDeterministicColour = (str: string): string => {
   let hash = 2;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
@@ -59,12 +60,6 @@ export const generateDeterministicColour = (str: string, format = "rgb") => {
   const r = Math.abs(hash) % 256;
   const g = Math.abs(hash >> 8) % 256;
   const b = Math.abs(hash >> 16) % 256;
-
-  if (format === "hex") {
-    return `#${r.toString(16).padStart(2, "0")}${g
-      .toString(16)
-      .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
-  }
 
   return `rgb(${r}, ${g}, ${b})`;
 };

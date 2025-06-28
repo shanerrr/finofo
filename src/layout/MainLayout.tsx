@@ -16,13 +16,17 @@ import FruitJar from "@/components/FruitJar/FruitJar";
 import FruitGraph from "@/components/FruitGraph/FruitGraph";
 
 import { Fruit, FruitWithCount, GroupBy, View } from "@/app/types";
-import { GROUP_BY_OPTIONS } from "@/app/constants";
+import {
+  GROUP_BY_OPTIONS,
+  VIEW_OPTIONS,
+  DEFAULT_GROUP_BY,
+} from "@/app/constants";
 
 const allowedGroupBySet = new Set(GROUP_BY_OPTIONS.map((opt) => opt.value));
 const validateGroupBy = (groupByParam: GroupBy): GroupBy => {
   return typeof groupByParam === "string" && allowedGroupBySet.has(groupByParam)
     ? groupByParam
-    : "none";
+    : DEFAULT_GROUP_BY;
 };
 
 type MainLayoutProps = {
@@ -40,7 +44,7 @@ export default function MainLayout({
   const [groupBy, setGroupBy] = useState(() => validateGroupBy(groupByParam));
   const [selectedFruits, setSelectedFruits] = useState<FruitWithCount[]>([]);
 
-  const isTableView = useMemo(() => view === "table", [view]);
+  const isTableView = useMemo(() => view === VIEW_OPTIONS.TABLE, [view]);
 
   const onFruitAdd = useCallback(
     (newFruit: Fruit) =>
@@ -49,10 +53,13 @@ export default function MainLayout({
 
         if (existingIndex >= 0) {
           const updated = [...prev];
-          updated[existingIndex] = {
-            ...updated[existingIndex],
-            count: (updated[existingIndex].count || 1) + 1,
-          };
+          const existingFruit = updated[existingIndex];
+          if (existingFruit) {
+            updated[existingIndex] = {
+              ...existingFruit,
+              count: (existingFruit.count || 1) + 1,
+            };
+          }
           return updated;
         } else {
           return [...prev, { ...newFruit, count: 1 }];
@@ -70,10 +77,13 @@ export default function MainLayout({
           const existingIndex = updated.findIndex((f) => f.id === newFruit.id);
 
           if (existingIndex >= 0) {
-            updated[existingIndex] = {
-              ...updated[existingIndex],
-              count: (updated[existingIndex].count || 1) + 1,
-            };
+            const existingFruit = updated[existingIndex];
+            if (existingFruit) {
+              updated[existingIndex] = {
+                ...existingFruit,
+                count: (existingFruit.count || 1) + 1,
+              };
+            }
           } else {
             updated.push({ ...newFruit, count: 1 });
           }

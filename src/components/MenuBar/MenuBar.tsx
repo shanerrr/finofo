@@ -11,7 +11,7 @@ import {
   MenubarCheckboxItem,
 } from "@/components/ui/menubar";
 
-import { GROUP_BY_OPTIONS } from "@/app/constants";
+import { GROUP_BY_OPTIONS, VIEW_OPTIONS } from "@/app/constants";
 import { GroupBy, View } from "@/app/types";
 
 type MenuBarProps = {
@@ -22,14 +22,14 @@ type MenuBarProps = {
 };
 
 export default function MenuBar({
-  view = "list",
+  view = VIEW_OPTIONS.LIST,
   groupBy = "none",
   setNewView,
   setNewGroup,
 }: MenuBarProps) {
   const searchParams = useSearchParams();
 
-  const isTableView = view.toLowerCase() === "table";
+  const isTableView = view === VIEW_OPTIONS.TABLE;
 
   const handleUpdateGroup = (newGroup: GroupBy) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -48,26 +48,26 @@ export default function MenuBar({
   return (
     <Menubar>
       <MenubarMenu>
-        <MenubarTrigger>View</MenubarTrigger>
+        <MenubarTrigger aria-label="View options">View</MenubarTrigger>
         <MenubarContent>
           <MenubarCheckboxItem
             checked={!isTableView}
-            onClick={() => handleUpdateView("list")}
+            onClick={() => handleUpdateView(VIEW_OPTIONS.LIST)}
+            aria-label="Switch to list view"
           >
             List View
           </MenubarCheckboxItem>
           <MenubarCheckboxItem
             checked={isTableView}
-            onClick={() => handleUpdateView("table")}
+            onClick={() => handleUpdateView(VIEW_OPTIONS.TABLE)}
+            aria-label="Switch to table view"
           >
             Table View
           </MenubarCheckboxItem>
         </MenubarContent>
       </MenubarMenu>
       <MenubarMenu>
-        <MenubarTrigger className="disabled:opacity-10">
-          Grouping
-        </MenubarTrigger>
+        <MenubarTrigger>Grouping</MenubarTrigger>
         <MenubarContent>
           <>
             {GROUP_BY_OPTIONS.map((option) => (
@@ -77,6 +77,7 @@ export default function MenuBar({
                 key={option.value}
                 checked={groupBy === option.value}
                 onClick={() => handleUpdateGroup(option.value)}
+                aria-label={`Group by ${option.label.toLowerCase()}`}
               >
                 Group by {option.label}
               </MenubarCheckboxItem>
@@ -86,6 +87,7 @@ export default function MenuBar({
               disabled={isTableView}
               checked={groupBy === "none"}
               onClick={() => handleUpdateGroup("none")}
+              aria-label="No grouping"
             >
               No Grouping
             </MenubarCheckboxItem>

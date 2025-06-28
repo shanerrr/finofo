@@ -1,4 +1,4 @@
-import { memo, useCallback } from "react";
+import { memo, useMemo } from "react";
 
 import { Fruit, FruitNutrition } from "@/app/types";
 
@@ -45,7 +45,7 @@ const NutrientsTable = memo(
     name: Fruit["name"];
     nutritions: FruitNutrition;
   }) => {
-    const nutrientEntries = useCallback(
+    const nutrientEntries = useMemo(
       () => getNutrientEntries(nutritions),
       [nutritions]
     );
@@ -68,7 +68,7 @@ const NutrientsTable = memo(
           </TableRow>
         </TableHeader>
         <TableBody>
-          {nutrientEntries().map(([key, value]) => (
+          {nutrientEntries.map(([key, value]) => (
             <NutrientRow key={key} nutrientKey={key} value={value} />
           ))}
         </TableBody>
