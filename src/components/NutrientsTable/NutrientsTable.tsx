@@ -11,7 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { Card, CardContent } from "../ui/card";
 
 // Extract nutrient entries for better performance
 const getNutrientEntries = (nutritions: FruitNutrition) => {

@@ -19,10 +19,8 @@ import { Fruit, FruitWithCount, GroupBy, View } from "@/app/types";
 import { GROUP_BY_OPTIONS } from "@/app/constants";
 
 const allowedGroupBySet = new Set(GROUP_BY_OPTIONS.map((opt) => opt.value));
-
-const validateGroupBy = (groupByParam: GroupBy): GroupBy => {
-  return typeof groupByParam === "string" &&
-    allowedGroupBySet.has(groupByParam as any)
+const validateGroupBy = (groupByParam: GroupBy): GroupBy | "none" => {
+  return typeof groupByParam === "string" && allowedGroupBySet.has(groupByParam)
     ? groupByParam
     : "none";
 };

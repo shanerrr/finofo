@@ -23,7 +23,7 @@ export interface FruitWithCount extends Fruit {
 
 export type View = "list" | "table";
 
-export type GroupBy = (typeof GROUP_BY_OPTIONS)[number]["value"] | "none";
+export type GroupBy = (typeof GROUP_BY_OPTIONS)[number]["value"];
 
 export interface SearchParams {
   view: View;
