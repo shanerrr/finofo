@@ -15,9 +15,8 @@ const NutrientsPopover = memo(
         <HoverCardContent
           align="center"
           side="right"
-          asChild
-          className="p-0"
           sticky="always"
+          className="p-0"
         >
           <NutrientsTable name={fruit.name} nutritions={fruit.nutritions} />
         </HoverCardContent>

@@ -5,11 +5,15 @@ import "./globals.css";
 const mulish = Mulish({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "I love fruits",
-  description: "A Finofo takehome challenge",
+  title: {
+    default: "I love fruits - Finofo Takehome",
+    template: "%s | I love fruits",
+  },
+  description: "A Finofo takehome challenge.",
 };
 
 export default function RootLayout({

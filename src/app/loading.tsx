@@ -1,24 +1,16 @@
-import { Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {
   return (
-    <main className="container mx-auto h-screen flex flex-col gap-4 py-8">
-      <header>
-        <h1 className="scroll-m-20 text-center text-4xl font-extrabold tracking-tight text-balance">
-          I ❤️ Fruits!
-        </h1>
-        <p className="text-center text-sm text-muted-foreground">by Shane</p>
-      </header>
-      <section className="flex gap-4">
-        <div className="h-10 w-32 bg-muted animate-pulse rounded-md" />
-        <div className="h-10 w-48 bg-muted animate-pulse rounded-md" />
-      </section>
-      <div className="flex-1 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          <p className="text-muted-foreground">Loading fruits...</p>
+    <main className="container py-8 flex flex-col gap-4 mx-auto h-screen w-screen">
+      <Skeleton className="w-1/5 h-8" />
+      <div className="grid grid-cols-2 gap-4 flex-1">
+        <Skeleton className="w-full h-full" />
+        <div className="flex flex-col gap-4">
+          <Skeleton className="w-full h-full" />
+          <Skeleton className="w-full h-full" />
         </div>
       </div>
     </main>
   );
-} 
+}

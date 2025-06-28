@@ -1,10 +1,31 @@
-import { memo } from "react";
+import { memo, useCallback } from "react";
 
 import NutrientsPopover from "../NutrientsTable/NutrientsPopover";
 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+
 import type { Fruit } from "@/app/types";
 
-const columns = [
+type Column = {
+  header: string;
+  accessor: keyof Omit<Fruit, "nutritions"> | ((fruit: Fruit) => string);
+};
+
+const columns: Column[] = [
   { header: "Name", accessor: "name" },
   { header: "Family", accessor: "family" },
   { header: "Order", accessor: "order" },
@@ -13,42 +34,88 @@ const columns = [
     header: "Calories",
     accessor: (fruit: Fruit) => `${fruit.nutritions.calories}kcal`,
   },
-];
+] as const;
 
-const FruitTable = memo(({ fruits }: { fruits: Fruit[] }) => {
-  return (
-    <table className="w-full rounded-md bg-secondary border-collapse text-base">
-      <thead>
-        <tr>
+type FruitTableProps = {
+  fruits: Fruit[];
+  onFruitAdd: (newFruit: Fruit) => void;
+};
+
+const FruitTableRow = memo(
+  ({
+    fruit,
+    columns,
+    onFruitAdd,
+  }: {
+    fruit: Fruit;
+    columns: Column[];
+    onFruitAdd: (fruit: Fruit) => void;
+  }) => {
+    const handleClick = useCallback(() => {
+      onFruitAdd(fruit);
+    }, [fruit, onFruitAdd]);
+
+    return (
+      <NutrientsPopover fruit={fruit}>
+        <TableRow
+          className="odd:bg-background/50 hover:bg-background duration-300 transition-colors cursor-pointer"
+          onClick={handleClick}
+        >
           {columns.map((col) => (
-            <th
+            <TableCell
               key={col.header}
-              className="px-4 border-b first:border-l-0 not-first:border-x last:border-r-0 py-2 text-left last:text-end font-bold w-[0%]"
+              className="w-[0%] last:text-right border-x last:border-r-0 first:border-l-0"
             >
-              {col.header}
-            </th>
+              {typeof col.accessor === "string"
+                ? fruit[col.accessor as keyof Omit<Fruit, "nutritions">]
+                : col.accessor(fruit)}
+            </TableCell>
           ))}
-        </tr>
-      </thead>
-      <tbody>
-        {fruits.map((fruit, idx) => (
-          <NutrientsPopover key={idx} fruit={fruit}>
-            <tr className="odd:bg-background/50 hover:bg-background duration-300 transition-colors">
+        </TableRow>
+      </NutrientsPopover>
+    );
+  }
+);
+
+FruitTableRow.displayName = "FruitTableRow";
+
+const FruitTable = memo(({ fruits, onFruitAdd }: FruitTableProps) => {
+  const handleFruitAdd = useCallback(
+    (fruit: Fruit) => {
+      onFruitAdd(fruit);
+    },
+    [onFruitAdd]
+  );
+
+  return (
+    <Card className="p-0">
+      <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
               {columns.map((col) => (
-                <td
+                <TableHead
                   key={col.header}
-                  className="border-b first:border-l-0 not-first:border-x last:border-r-0 px-4 py-2 text-left last:text-end w-[0%]"
+                  className="border-x last:border-r-0 first:border-l-0 last:text-end"
                 >
-                  {typeof col.accessor === "string"
-                    ? fruit[col.accessor as keyof Omit<Fruit, "nutritions">]
-                    : col.accessor(fruit)}
-                </td>
+                  {col.header}
+                </TableHead>
               ))}
-            </tr>
-          </NutrientsPopover>
-        ))}
-      </tbody>
-    </table>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {fruits.map((fruit) => (
+              <FruitTableRow
+                key={fruit.id}
+                fruit={fruit}
+                columns={columns}
+                onFruitAdd={handleFruitAdd}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 });
 

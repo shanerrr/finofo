@@ -17,6 +17,10 @@ export interface Fruit {
   nutritions: FruitNutrition;
 }
 
+export interface FruitWithCount extends Fruit {
+  count: number;
+}
+
 export type View = "list" | "table";
 
 export type GroupBy = (typeof GROUP_BY_OPTIONS)[number]["value"] | "none";

@@ -1,8 +1,42 @@
-import { memo } from "react";
+import { memo, useCallback } from "react";
 
 import { Fruit, FruitNutrition } from "@/app/types";
 
 import { NUTRIENT_UNITS } from "@/app/constants";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
+import { Card, CardContent } from "../ui/card";
+
+// Extract nutrient entries for better performance
+const getNutrientEntries = (nutritions: FruitNutrition) => {
+  return Object.entries(nutritions).filter(
+    ([key]) => key !== "id" && key !== "name"
+  );
+};
+
+const NutrientRow = memo(
+  ({ nutrientKey, value }: { nutrientKey: string; value: number }) => {
+    const unit = NUTRIENT_UNITS[nutrientKey] || "";
+
+    return (
+      <TableRow>
+        <TableCell className="border-r capitalize">{nutrientKey}</TableCell>
+        <TableCell className="text-right">
+          {value}
+          {unit}
+        </TableCell>
+      </TableRow>
+    );
+  }
+);
+
+NutrientRow.displayName = "NutrientRow";
 
 const NutrientsTable = memo(
   ({
@@ -12,43 +46,34 @@ const NutrientsTable = memo(
     name: Fruit["name"];
     nutritions: FruitNutrition;
   }) => {
+    const nutrientEntries = useCallback(
+      () => getNutrientEntries(nutritions),
+      [nutritions]
+    );
+
     return (
-      <div className="w-full">
-        <table className="w-full bg-sidebar rounded-md border-collapse">
-          <caption className="sr-only">{name} Nutrition Table</caption>
-          <thead>
-            <tr>
-              <th colSpan={2} className="py-2 text-center font-black">
-                {name}
-              </th>
-            </tr>
-            <tr className="even:bg-muted border-t">
-              <th scope="col" className="border px-4 py-2 text-left">
-                Macronutrients
-              </th>
-              <th scope="col" className="border px-4 py-2 text-left">
-                Amount
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {Object.entries(nutritions)
-              .filter(([key]) => key !== "id" && key !== "name")
-              .map(([key, value]) => (
-                <tr
-                  key={key}
-                  className="even:bg-muted border-y first:border-t-0 last:border-b-0"
-                >
-                  <td className="px-4 py-2 text-left capitalize">{key}</td>
-                  <td className="px-4 py-2 text-left">
-                    {value}
-                    {NUTRIENT_UNITS[key] || ""}
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead colSpan={2} className="text-center font-black">
+              {name}
+            </TableHead>
+          </TableRow>
+          <TableRow>
+            <TableHead className="border-r font-semibold" scope="col">
+              Macronutrients
+            </TableHead>
+            <TableHead className="text-right font-semibold" scope="col">
+              Amount
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {nutrientEntries().map(([key, value]) => (
+            <NutrientRow key={key} nutrientKey={key} value={value} />
+          ))}
+        </TableBody>
+      </Table>
     );
   }
 );

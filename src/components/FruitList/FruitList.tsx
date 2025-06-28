@@ -9,107 +9,166 @@ import { cn } from "@/utils/classNames";
 import { groupFruits, sortGroupedFruits, formatItemCount } from "@/utils/fruit";
 
 import type { Fruit, GroupBy } from "@/app/types";
+import { Card, CardContent } from "../ui/card";
+import { Table, TableBody, TableCell, TableRow } from "../ui/table";
 
-interface FruitListProps {
+type FruitListProps = {
   fruits: Fruit[];
   groupBy: GroupBy;
-}
+  onFruitAdd: (newFruit: Fruit) => void;
+  onFruitGroupAdd: (newFruits: Fruit[]) => void;
+};
 
-const FruitList = memo(({ fruits, groupBy }: FruitListProps) => {
-  const [selectedRow, setSelectedRow] = useState<number | null>(null);
+const GroupRow = memo(
+  ({
+    groupName,
+    groupFruits,
+    index,
+    isSelected,
+    onRowClick,
+    onGroupAdd,
+    onFruitAdd,
+  }: {
+    groupName: string;
+    groupFruits: Fruit[];
+    index: number;
+    isSelected: boolean;
+    onRowClick: (index: number) => void;
+    onGroupAdd: (fruits: Fruit[]) => void;
+    onFruitAdd: (fruit: Fruit) => void;
+  }) => {
+    const handleRowClick = useCallback(() => {
+      onRowClick(index);
+    }, [onRowClick, index]);
 
-  const groupedFruit = useMemo(() => {
-    return groupFruits(fruits, groupBy);
-  }, [fruits, groupBy]);
+    const handleGroupAdd = useCallback(() => {
+      onGroupAdd(groupFruits);
+    }, [onGroupAdd, groupFruits]);
 
-  const groupEntries = useMemo(
-    () => sortGroupedFruits(groupedFruit),
-    [groupedFruit]
-  );
-
-  const rowClickHandler = useCallback((index: number) => {
-    setSelectedRow((prev) => (prev === index ? null : index));
-  }, []);
-
-  const handleAddGroupClick = useCallback((event: React.MouseEvent) => {
-    event.stopPropagation();
-    // TODO: Implement add group functionality
-    console.log("Add group clicked");
-  }, []);
-
-  if (groupBy === "none") {
     return (
-      <div className="text-base rounded-md overflow-hidden">
-        <FruitListFlat fruits={fruits} />
-      </div>
+      <Fragment>
+        <TableRow
+          className={cn(
+            "border-b cursor-pointer hover:bg-background transition-all focus-within:bg-background",
+            {
+              "bg-background": isSelected,
+            }
+          )}
+          onClick={handleRowClick}
+          role="button"
+          aria-expanded={isSelected}
+          aria-label={`${groupName} group with ${groupFruits.length} items`}
+        >
+          <TableCell className="text-left flex justify-between items-center">
+            <span className="font-semibold">{groupName}</span>
+            <span className="text-sm text-ring">
+              {formatItemCount(groupFruits.length)}
+            </span>
+          </TableCell>
+        </TableRow>
+
+        {isSelected && (
+          <>
+            <TableRow>
+              <TableCell className="text-center text-sm bg-background p-0">
+                <Button
+                  variant="link"
+                  aria-label="Add new item to this group"
+                  className="w-full cursor-pointer"
+                  onClick={handleGroupAdd}
+                >
+                  Add Group
+                </Button>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="text-sm p-0">
+                <FruitListFlat
+                  fruits={groupFruits}
+                  onFruitAdd={onFruitAdd}
+                  isNested
+                />
+              </TableCell>
+            </TableRow>
+          </>
+        )}
+      </Fragment>
     );
   }
+);
 
-  // handle empty grouped results
-  if (groupEntries.length === 0) {
+GroupRow.displayName = "GroupRow";
+
+const FruitList = memo(
+  ({ fruits, groupBy, onFruitAdd, onFruitGroupAdd }: FruitListProps) => {
+    const [selectedRow, setSelectedRow] = useState<number | null>(null);
+
+    const groupedFruit = useMemo(() => {
+      return groupFruits(fruits, groupBy);
+    }, [fruits, groupBy]);
+
+    const groupEntries = useMemo(
+      () => sortGroupedFruits(groupedFruit),
+      [groupedFruit]
+    );
+
+    const rowClickHandler = useCallback((index: number) => {
+      setSelectedRow((prev) => (prev === index ? null : index));
+    }, []);
+
+    const handleGroupAdd = useCallback(
+      (groupFruits: Fruit[]) => {
+        onFruitGroupAdd(groupFruits);
+      },
+      [onFruitGroupAdd]
+    );
+
+    if (groupBy === "none") {
+      return (
+        <Card className="p-0">
+          <CardContent className="p-0">
+            <FruitListFlat fruits={fruits} onFruitAdd={onFruitAdd} />
+          </CardContent>
+        </Card>
+      );
+    }
+
+    if (groupEntries.length === 0) {
+      return (
+        <div className="text-center py-8 text-muted-foreground">
+          No fruits available for grouping
+        </div>
+      );
+    }
+
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        No fruits available for grouping
-      </div>
+      <Card className="p-0">
+        <CardContent className="p-0">
+          <Table
+            className="w-full rounded-md"
+            role="table"
+            aria-label="Grouped fruits list"
+          >
+            <TableBody>
+              {groupEntries.map(([groupName, groupFruits], index) => (
+                <GroupRow
+                  key={groupName}
+                  groupName={groupName}
+                  groupFruits={groupFruits}
+                  index={index}
+                  isSelected={selectedRow === index}
+                  onRowClick={rowClickHandler}
+                  onGroupAdd={handleGroupAdd}
+                  onFruitAdd={onFruitAdd}
+                />
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     );
   }
-
-  return (
-    <table
-      className="w-full bg-secondary rounded-md"
-      role="table"
-      aria-label="Grouped fruits list"
-    >
-      <tbody>
-        {groupEntries.map(([groupName, groupFruits], index) => (
-          <Fragment key={groupName}>
-            <tr
-              className={cn(
-                "border-b cursor-pointer hover:bg-background transition-all focus-within:bg-background",
-                {
-                  "bg-background": selectedRow === index,
-                }
-              )}
-              onClick={() => rowClickHandler(index)}
-              role="button"
-              aria-expanded={selectedRow === index}
-              aria-label={`${groupName} group with ${groupFruits.length} items`}
-            >
-              <td className="px-4 py-2 text-left flex justify-between items-center">
-                <span className="font-semibold">{groupName}</span>
-                <span className="text-sm text-ring">
-                  {formatItemCount(groupFruits.length)}
-                </span>
-              </td>
-            </tr>
-
-            {selectedRow === index && (
-              <>
-                <tr>
-                  <td className="text-center text-sm bg-background">
-                    <Button
-                      variant="link"
-                      onClick={handleAddGroupClick}
-                      aria-label="Add new item to this group"
-                      className="w-full cursor-pointer"
-                    >
-                      Add Group
-                    </Button>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="text-sm">
-                    <FruitListFlat fruits={groupFruits} isNested />
-                  </td>
-                </tr>
-              </>
-            )}
-          </Fragment>
-        ))}
-      </tbody>
-    </table>
-  );
-});
+);
 
 FruitList.displayName = "FruitList";
 
