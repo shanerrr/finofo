@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "API_KEY=fruit-api-challenge-2025 BASE_API_URL=https://fruity-proxy.vercel.app/api next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

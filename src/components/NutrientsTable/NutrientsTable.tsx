@@ -1,5 +1,8 @@
 import { memo } from "react";
+
 import { Fruit, FruitNutrition } from "@/app/types";
+
+import { NUTRIENT_UNITS } from "@/app/constants";
 
 const NutrientsTable = memo(
   ({
@@ -10,8 +13,9 @@ const NutrientsTable = memo(
     nutritions: FruitNutrition;
   }) => {
     return (
-      <div className="my-6 w-full overflow-y-auto">
-        <table className="w-full">
+      <div className="w-full">
+        <table className="w-full bg-sidebar rounded-md border-collapse">
+          <caption className="sr-only">{name} Nutrition Table</caption>
           <thead>
             <tr>
               <th colSpan={2} className="py-2 text-center font-black">
@@ -19,24 +23,26 @@ const NutrientsTable = memo(
               </th>
             </tr>
             <tr className="even:bg-muted border-t">
-              <th className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right">
+              <th scope="col" className="border px-4 py-2 text-left">
                 Macronutrients
               </th>
-              <th className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right">
+              <th scope="col" className="border px-4 py-2 text-left">
                 Amount
               </th>
             </tr>
           </thead>
           <tbody>
-            {Object.keys(nutritions)
-              .slice(1)
-              .map((key) => (
-                <tr key={key} className="even:bg-muted border-t">
-                  <td className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right capitalize">
-                    {key}
-                  </td>
-                  <td className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right">
-                    {nutritions[key as keyof FruitNutrition]}g
+            {Object.entries(nutritions)
+              .filter(([key]) => key !== "id" && key !== "name")
+              .map(([key, value]) => (
+                <tr
+                  key={key}
+                  className="even:bg-muted border-y first:border-t-0 last:border-b-0"
+                >
+                  <td className="px-4 py-2 text-left capitalize">{key}</td>
+                  <td className="px-4 py-2 text-left">
+                    {value}
+                    {NUTRIENT_UNITS[key] || ""}
                   </td>
                 </tr>
               ))}

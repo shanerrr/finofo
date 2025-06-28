@@ -1,44 +1,78 @@
-import { memo } from "react";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "../ui/hover-card";
+"use client";
 
-import { InfoIcon } from "lucide-react";
+import { Fragment, memo, useMemo, useState, useCallback } from "react";
 
-import NutrientsTable from "../NutrientsTable/NutrientsTable";
-import type { Fruit } from "@/app/types";
+import FruitListFlat from "./FruitListFlat";
 
-const FruitList = memo(({ fruits }: { fruits: Fruit[] }) => {
+import type { Fruit, GroupBy } from "@/app/types";
+import { groupFruits, sortGroupedFruits, formatItemCount } from "@/utils/fruit";
+
+interface FruitListProps {
+  fruits: Fruit[];
+  groupBy: GroupBy;
+}
+
+const FruitList = memo(({ fruits, groupBy }: FruitListProps) => {
+  const [selectedRow, setSelectedRow] = useState<number | null>(null);
+
+  const groupedFruit = useMemo(() => {
+    return groupFruits(fruits, groupBy);
+  }, [fruits, groupBy]);
+
+  const groupEntries = sortGroupedFruits(groupedFruit);
+
+  const rowClickHandler = useCallback((index: number) => {
+    setSelectedRow((prev) => (prev === index ? null : index));
+  }, []);
+
+  if (groupBy === "none") {
+    return (
+      <div className="text-base rounded-md overflow-hidden">
+        <FruitListFlat fruits={fruits} />
+      </div>
+    );
+  }
+
+  // handle empty grouped results
+  if (groupEntries.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        No fruits available for grouping
+      </div>
+    );
+  }
+
   return (
-    <table className="w-full bg-secondary rounded-md text-lg">
+    <table
+      className="w-full bg-secondary rounded-md"
+      role="table"
+      aria-label="Grouped fruits list"
+    >
       <tbody>
-        {fruits.map((fruit) => (
-          <tr key={fruit.id} className="border-b">
-            <td className="p-4 text-left [&[align=center]]:text-center [&[align=right]]:text-right">
-              <HoverCard openDelay={200}>
-                <HoverCardTrigger asChild>
-                  <div className="hover:text-sidebar-ring duration-300 transition-colors flex justify-between items-center gap-2">
-                    {fruit.name} ({fruit.nutritions.calories} kcal)
-                    <InfoIcon />
-                  </div>
-                </HoverCardTrigger>
-                <HoverCardContent
-                  align="center"
-                  side="left"
-                  asChild
-                  className="p-0"
-                  sticky="always"
-                >
-                  <NutrientsTable
-                    name={fruit.name}
-                    nutritions={fruit.nutritions}
-                  />
-                </HoverCardContent>
-              </HoverCard>
-            </td>
-          </tr>
+        {groupEntries.map(([groupName, groupFruits], index) => (
+          <Fragment key={groupName}>
+            <tr
+              className="border-b cursor-pointer hover:bg-background transition-all focus-within:bg-background"
+              onClick={() => rowClickHandler(index)}
+              role="button"
+              aria-expanded={selectedRow === index}
+              aria-label={`${groupName} group with ${groupFruits.length} items`}
+            >
+              <td className="px-4 py-2 text-left flex justify-between items-center">
+                <span className="font-semibold">{groupName}</span>
+                <span className="text-sm text-ring">
+                  {formatItemCount(groupFruits.length)}
+                </span>
+              </td>
+            </tr>
+            {selectedRow === index && (
+              <tr>
+                <td className="text-sm">
+                  <FruitListFlat fruits={groupFruits} isNested />
+                </td>
+              </tr>
+            )}
+          </Fragment>
         ))}
       </tbody>
     </table>

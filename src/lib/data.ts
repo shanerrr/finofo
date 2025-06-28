@@ -1,8 +1,12 @@
+import "server-only";
+
 import { Fruit } from "@/app/types";
 
+/**
+ * API call for finofo takehome API
+ * @returns Record of grouped fruits
+ */
 export const getFruits = async (): Promise<Fruit[]> => {
-  console.log("API_KEY:", process.env.BASE_API_URL);
-
   const response = await fetch(`${process.env.BASE_API_URL}/fruits`, {
     headers: {
       "x-api-key": process.env.API_KEY!,

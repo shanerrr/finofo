@@ -1,3 +1,5 @@
+import { GROUP_BY_OPTIONS } from "@/app/constants";
+
 export interface FruitNutrition {
   calories: number;
   fat: number;
@@ -13,4 +15,13 @@ export interface Fruit {
   order: string;
   genus: string;
   nutritions: FruitNutrition;
+}
+
+export type View = "list" | "table";
+
+export type GroupBy = (typeof GROUP_BY_OPTIONS)[number]["value"] | "none";
+
+export interface SearchParams {
+  view: View;
+  groupBy: GroupBy;
 }

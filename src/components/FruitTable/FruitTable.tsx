@@ -1,41 +1,57 @@
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "../ui/hover-card";
-// import { NutrientsTable } from "../NutrientsTable/NutrientsTable";
-import { Fruit } from "@/app/types";
+import { memo } from "react";
 
-export default function FruitTable({ fruits }: { fruits: Fruit[] }) {
+import NutrientsPopover from "../NutrientsTable/NutrientsPopover";
+
+import type { Fruit } from "@/app/types";
+
+const columns = [
+  { header: "Name", accessor: "name" },
+  { header: "Family", accessor: "family" },
+  { header: "Order", accessor: "order" },
+  { header: "Genus", accessor: "genus" },
+  {
+    header: "Calories",
+    accessor: (fruit: Fruit) => `${fruit.nutritions.calories}kcal`,
+  },
+];
+
+const FruitTable = memo(({ fruits }: { fruits: Fruit[] }) => {
   return (
-    <table className="w-full bg-secondary rounded-md">
+    <table className="w-full rounded-md bg-secondary border-collapse text-base">
+      <thead>
+        <tr>
+          {columns.map((col) => (
+            <th
+              key={col.header}
+              className="px-4 border-b first:border-l-0 not-first:border-x last:border-r-0 py-2 text-left last:text-end font-bold"
+            >
+              {col.header}
+            </th>
+          ))}
+        </tr>
+      </thead>
       <tbody>
-        {fruits.map((fruit) => (
-          <tr key={fruit.id} className="border-b">
-            <td className="p-4 text-left [&[align=center]]:text-center [&[align=right]]:text-right">
-              <HoverCard openDelay={200}>
-                <HoverCardTrigger asChild>
-                  <div className="w-max hover:text-sidebar-ring duration-300 transition-colors">
-                    {fruit.name} ({fruit.nutritions.calories} kcal)
-                  </div>
-                </HoverCardTrigger>
-                <HoverCardContent
-                  align="center"
-                  side="left"
-                  asChild
-                  className="p-0"
-                  sticky="always"
+        {fruits.map((fruit, idx) => (
+          <NutrientsPopover key={idx} fruit={fruit}>
+            <tr className="odd:bg-background/50 hover:text-sidebar-ring duration-300 transition-colors">
+              {columns.map((col) => (
+                <td
+                  key={col.header}
+                  className="border-b first:border-l-0 not-first:border-x last:border-r-0 px-4 py-2 text-left last:text-end"
                 >
-                  {/* <NutrientsTable
-                    name={fruit.name}
-                    nutritions={fruit.nutritions}
-                  /> */}
-                </HoverCardContent>
-              </HoverCard>
-            </td>
-          </tr>
+                  {typeof col.accessor === "string"
+                    ? fruit[col.accessor as keyof Omit<Fruit, "nutritions">]
+                    : col.accessor(fruit)}
+                </td>
+              ))}
+            </tr>
+          </NutrientsPopover>
         ))}
       </tbody>
     </table>
   );
-}
+});
+
+FruitTable.displayName = "FruitTable";
+
+export default FruitTable;

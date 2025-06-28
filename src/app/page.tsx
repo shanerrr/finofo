@@ -10,9 +10,21 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { getFruits } from "@/lib/data";
+import FruitTable from "@/components/FruitTable/FruitTable";
+import { SearchParams } from "./types";
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const { view, groupBy = "none" } = await searchParams;
+
   const fruits = await getFruits();
+
+  const isTableView = view === "table";
+
+  //todo layout cookies
 
   return (
     <main className="container mx-auto h-screen flex flex-col gap-4 py-8">
@@ -29,17 +41,23 @@ export default async function Home() {
       <ResizablePanelGroup direction="horizontal" className="h-full flex-1">
         <ResizablePanel
           className="h-full"
-          defaultSize={25}
-          minSize={25}
-          maxSize={50}
+          defaultSize={isTableView ? 60 : 25}
+          minSize={isTableView ? 60 : 25}
+          maxSize={isTableView ? 75 : 30}
         >
           <ScrollArea className="h-full">
-            <FruitList fruits={fruits} />
+            {isTableView ? (
+              <FruitTable fruits={fruits} />
+            ) : (
+              <FruitList fruits={fruits} groupBy={groupBy} />
+            )}
           </ScrollArea>
         </ResizablePanel>
-        <ResizableHandle withHandle className="mx-4" />
-        <ResizablePanel className="h-full" defaultSize={75}>
-          dasd
+        <ResizableHandle withHandle className="mx-4 -z-10" />
+        <ResizablePanel className="h-full" defaultSize={isTableView ? 40 : 75}>
+          <h1 className="scroll-m-20 text-center text-4xl font-extrabold tracking-tight text-balance">
+            Fruit Jar
+          </h1>
         </ResizablePanel>
       </ResizablePanelGroup>
     </main>
