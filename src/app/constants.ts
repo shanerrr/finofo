@@ -50,4 +50,8 @@ export const columns: Column[] = [
     header: option.label,
     accessor: option.value as keyof Omit<Fruit, "nutritions">,
   })),
+  {
+    header: "Calories",
+    accessor: (fruit: Fruit) => `${fruit.nutritions.calories}kcal`,
+  },
 ] as const;

@@ -28,7 +28,12 @@ const FruitRow = memo(
     }, [fruit, onFruitAdd]);
 
     return (
-      <TableRow className={cn("cursor-pointer", { "bg-background": isNested })}>
+      <TableRow
+        className={cn(
+          "cursor-pointer",
+          isNested ? "bg-background" : "odd:bg-background/50"
+        )}
+      >
         <TableCell className="text-left " onClick={handleClick}>
           <NutrientsPopover fruit={fruit}>
             <div className="flex justify-between items-center gap-2 cursor-pointer">

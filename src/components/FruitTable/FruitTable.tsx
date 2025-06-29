@@ -55,7 +55,7 @@ const GroupHeaderRow = memo(
       <Fragment>
         <TableRow
           className={cn(
-            "border-b cursor-pointer hover:bg-background transition-all focus-within:bg-background",
+            "border-b cursor-pointer transition-all focus-within:bg-background",
             {
               "bg-background": isSelected,
             }

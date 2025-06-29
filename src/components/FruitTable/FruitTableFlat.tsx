@@ -25,7 +25,10 @@ const FruitTableFlat = memo(
           {fruits.map((fruit) => (
             <NutrientsPopover key={fruit.id} fruit={fruit}>
               <TableRow
-                className={cn("cursor-pointer", { "bg-background": isNested })}
+                className={cn(
+                  "cursor-pointer",
+                  isNested ? "bg-background" : "odd:bg-background/50"
+                )}
                 onClick={() => onFruitAdd(fruit)}
               >
                 {columns.map((col) => (
