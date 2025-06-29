@@ -121,7 +121,12 @@ export default function MainLayout({
         >
           <ScrollArea className="h-full">
             {isTableView ? (
-              <FruitTable fruits={fruits} onFruitAdd={onFruitAdd} />
+              <FruitTable 
+                fruits={fruits} 
+                groupBy={groupBy}
+                onFruitAdd={onFruitAdd} 
+                onFruitGroupAdd={onFruitGroupAdd}
+              />
             ) : (
               <FruitList
                 fruits={fruits}
