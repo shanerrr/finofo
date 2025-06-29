@@ -1,4 +1,4 @@
-import type { Fruit, GroupBy } from "@/app/types";
+import type { Column, Fruit, GroupBy } from "@/app/types";
 import { DEFAULT_GROUP_BY } from "@/app/constants";
 
 /**
@@ -62,4 +62,20 @@ export const generateDeterministicColour = (str: string): string => {
   const b = Math.abs(hash >> 16) % 256;
 
   return `rgb(${r}, ${g}, ${b})`;
+};
+
+/**
+ * Gets the proper column value
+ * @param fruit - Fruit item
+ * @param accessor - Accessor
+ * @returns The ACcessor value
+ */
+export const getColumnValue = (
+  fruit: Fruit,
+  accessor: Column["accessor"]
+): string => {
+  if (typeof accessor === "string") {
+    return String(fruit[accessor]);
+  }
+  return accessor(fruit);
 };

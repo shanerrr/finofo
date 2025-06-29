@@ -1,117 +1,186 @@
-import { memo, useCallback } from "react";
+import { Fragment, memo, useCallback, useMemo, useState } from "react";
 
-import NutrientsPopover from "../NutrientsTable/NutrientsPopover";
+import FruitTableFlat from "./FruitTableFlat";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
+import { Table, TableBody, TableCell, TableRow } from "../ui/table";
 import { Card, CardContent } from "../ui/card";
+import { Button } from "../ui/button";
 
-import type { Fruit } from "@/app/types";
+import { DEFAULT_GROUP_BY } from "@/app/constants";
+import { cn } from "@/utils/classNames";
+import { groupFruits, sortGroupedFruits, formatItemCount } from "@/utils/fruit";
 
-type Column = {
-  header: string;
-  accessor: keyof Omit<Fruit, "nutritions"> | ((fruit: Fruit) => string);
-};
-
-const columns: Column[] = [
-  { header: "Name", accessor: "name" },
-  { header: "Family", accessor: "family" },
-  { header: "Order", accessor: "order" },
-  { header: "Genus", accessor: "genus" },
-  {
-    header: "Calories",
-    accessor: (fruit: Fruit) => `${fruit.nutritions.calories}kcal`,
-  },
-] as const;
+import type { Fruit, GroupBy } from "@/app/types";
 
 type FruitTableProps = {
   fruits: Fruit[];
+  groupBy: GroupBy;
   onFruitAdd: (newFruit: Fruit) => void;
+  onFruitGroupAdd: (newFruits: Fruit[]) => void;
 };
 
-const FruitTableRow = memo(
+type GroupHeaderRowProps = {
+  groupName: string;
+  groupFruits: Fruit[];
+  index: number;
+  isSelected: boolean;
+  onRowClick: (index: number) => void;
+  onGroupAdd: (fruits: Fruit[]) => void;
+  onFruitAdd: (fruit: Fruit) => void;
+};
+
+const GroupHeaderRow = memo(
   ({
-    fruit,
-    columns,
+    groupName,
+    groupFruits,
+    index,
+    isSelected,
+    onRowClick,
+    onGroupAdd,
     onFruitAdd,
-  }: {
-    fruit: Fruit;
-    columns: Column[];
-    onFruitAdd: (fruit: Fruit) => void;
-  }) => {
-    const handleClick = useCallback(() => {
-      onFruitAdd(fruit);
-    }, [fruit, onFruitAdd]);
+  }: GroupHeaderRowProps) => {
+    const handleRowClick = useCallback(() => {
+      onRowClick(index);
+    }, [onRowClick, index]);
+
+    const handleGroupAdd = useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onGroupAdd(groupFruits);
+      },
+      [onGroupAdd, groupFruits]
+    );
 
     return (
-      <NutrientsPopover fruit={fruit}>
+      <Fragment>
         <TableRow
-          className="odd:bg-background/50 hover:bg-background duration-300 transition-colors cursor-pointer"
-          onClick={handleClick}
+          className={cn(
+            "border-b cursor-pointer transition-all focus-within:bg-background",
+            {
+              "bg-background": isSelected,
+            }
+          )}
+          onClick={handleRowClick}
+          role="button"
+          aria-expanded={isSelected}
+          aria-label={`${groupName} group with ${groupFruits.length} items`}
         >
-          {columns.map((col) => (
-            <TableCell
-              key={col.header}
-              className="w-[0%] last:text-right border-x last:border-r-0 first:border-l-0"
-            >
-              {typeof col.accessor === "string"
-                ? fruit[col.accessor as keyof Omit<Fruit, "nutritions">]
-                : col.accessor(fruit)}
-            </TableCell>
-          ))}
+          <TableCell className="text-left flex justify-between items-center">
+            <span className="font-semibold">{groupName}</span>
+            <span className="text-sm text-ring">
+              {formatItemCount(groupFruits.length)}
+            </span>
+          </TableCell>
         </TableRow>
-      </NutrientsPopover>
+
+        {isSelected && (
+          <>
+            <TableRow>
+              <TableCell className="text-center text-sm bg-background p-0">
+                <Button
+                  variant="link"
+                  aria-label={`Add all ${groupFruits.length} items from ${groupName} group`}
+                  className="w-full cursor-pointer"
+                  onClick={handleGroupAdd}
+                >
+                  Add Group
+                </Button>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="text-sm p-0">
+                <FruitTableFlat
+                  fruits={groupFruits}
+                  onFruitAdd={onFruitAdd}
+                  isNested
+                />
+              </TableCell>
+            </TableRow>
+          </>
+        )}
+      </Fragment>
     );
   }
 );
 
-FruitTableRow.displayName = "FruitTableRow";
+GroupHeaderRow.displayName = "GroupHeaderRow";
 
-const FruitTable = memo(({ fruits, onFruitAdd }: FruitTableProps) => {
-  const handleFruitAdd = useCallback(
-    (fruit: Fruit) => {
-      onFruitAdd(fruit);
-    },
-    [onFruitAdd]
-  );
+const FruitTable = memo(
+  ({ fruits, groupBy, onFruitAdd, onFruitGroupAdd }: FruitTableProps) => {
+    const [selectedRow, setSelectedRow] = useState<number | null>(null);
 
-  return (
-    <Card className="p-0">
-      <CardContent className="p-0">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {columns.map((col) => (
-                <TableHead
-                  key={col.header}
-                  className="border-x last:border-r-0 first:border-l-0 last:text-end"
-                >
-                  {col.header}
-                </TableHead>
+    const groupEntries = useMemo(() => {
+      const grouped = groupFruits(fruits, groupBy);
+      return sortGroupedFruits(grouped);
+    }, [fruits, groupBy]);
+
+    // Memoize callback functions
+    const rowClickHandler = useCallback((index: number) => {
+      setSelectedRow((prev) => (prev === index ? null : index));
+    }, []);
+
+    const handleGroupAdd = useCallback(
+      (groupFruits: Fruit[]) => {
+        onFruitGroupAdd(groupFruits);
+      },
+      [onFruitGroupAdd]
+    );
+
+    const handleFruitAdd = useCallback(
+      (fruit: Fruit) => {
+        onFruitAdd(fruit);
+      },
+      [onFruitAdd]
+    );
+
+    // If no grouping, render flat table
+    if (groupBy === DEFAULT_GROUP_BY) {
+      return (
+        <Card className="p-0">
+          <CardContent className="p-0">
+            <FruitTableFlat fruits={fruits} onFruitAdd={onFruitAdd} />
+          </CardContent>
+        </Card>
+      );
+    }
+
+    // If no groups available
+    if (groupEntries.length === 0) {
+      return (
+        <div
+          className="text-center py-8 text-muted-foreground"
+          role="status"
+          aria-live="polite"
+        >
+          No fruits available for grouping
+        </div>
+      );
+    }
+
+    return (
+      <Card className="p-0">
+        <CardContent className="p-0">
+          <Table>
+            <TableBody>
+              {groupEntries.map(([groupName, groupFruits], index) => (
+                <GroupHeaderRow
+                  key={groupName}
+                  groupName={groupName}
+                  groupFruits={groupFruits}
+                  index={index}
+                  isSelected={selectedRow === index}
+                  onRowClick={rowClickHandler}
+                  onGroupAdd={handleGroupAdd}
+                  onFruitAdd={handleFruitAdd}
+                />
               ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {fruits.map((fruit) => (
-              <FruitTableRow
-                key={fruit.id}
-                fruit={fruit}
-                columns={columns}
-                onFruitAdd={handleFruitAdd}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
-  );
-});
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    );
+  }
+);
 
 FruitTable.displayName = "FruitTable";
 
