@@ -19,6 +19,16 @@ type FruitTableProps = {
   onFruitGroupAdd: (newFruits: Fruit[]) => void;
 };
 
+type GroupHeaderRowProps = {
+  groupName: string;
+  groupFruits: Fruit[];
+  index: number;
+  isSelected: boolean;
+  onRowClick: (index: number) => void;
+  onGroupAdd: (fruits: Fruit[]) => void;
+  onFruitAdd: (fruit: Fruit) => void;
+};
+
 const GroupHeaderRow = memo(
   ({
     groupName,
@@ -28,15 +38,7 @@ const GroupHeaderRow = memo(
     onRowClick,
     onGroupAdd,
     onFruitAdd,
-  }: {
-    groupName: string;
-    groupFruits: Fruit[];
-    index: number;
-    isSelected: boolean;
-    onRowClick: (index: number) => void;
-    onGroupAdd: (fruits: Fruit[]) => void;
-    onFruitAdd: (fruit: Fruit) => void;
-  }) => {
+  }: GroupHeaderRowProps) => {
     const handleRowClick = useCallback(() => {
       onRowClick(index);
     }, [onRowClick, index]);
@@ -87,7 +89,11 @@ const GroupHeaderRow = memo(
             </TableRow>
             <TableRow>
               <TableCell className="text-sm p-0">
-                <FruitTableFlat fruits={groupFruits} onFruitAdd={onFruitAdd} />
+                <FruitTableFlat
+                  fruits={groupFruits}
+                  onFruitAdd={onFruitAdd}
+                  isNested
+                />
               </TableCell>
             </TableRow>
           </>
@@ -141,7 +147,11 @@ const FruitTable = memo(
     // If no groups available
     if (groupEntries.length === 0) {
       return (
-        <div className="text-center py-8 text-muted-foreground">
+        <div
+          className="text-center py-8 text-muted-foreground"
+          role="status"
+          aria-live="polite"
+        >
           No fruits available for grouping
         </div>
       );

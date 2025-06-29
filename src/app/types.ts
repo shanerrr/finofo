@@ -29,3 +29,8 @@ export interface SearchParams {
   view: View;
   groupBy: GroupBy;
 }
+
+export type Column = {
+  header: string;
+  accessor: keyof Omit<Fruit, "nutritions"> | ((fruit: Fruit) => string);
+};

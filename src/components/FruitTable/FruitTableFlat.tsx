@@ -1,40 +1,49 @@
-import { memo, useCallback } from "react";
+import { memo } from "react";
 
-import { Table, TableBody } from "../ui/table";
+import { Table, TableBody, TableCell, TableRow } from "../ui/table";
 
+import NutrientsPopover from "../NutrientsTable/NutrientsPopover";
 import FruitTableHeader from "./FruitTableHeader";
-import FruitTableRow from "./FruitTableRow";
 
+import { getColumnValue } from "@/utils/fruit";
+import { columns } from "@/app/constants";
 import type { Fruit } from "@/app/types";
+import { cn } from "@/utils/classNames";
 
 type FruitTableProps = {
   fruits: Fruit[];
   onFruitAdd: (newFruit: Fruit) => void;
+  isNested?: boolean;
 };
 
-const FruitTableFlat = memo(({ fruits, onFruitAdd }: FruitTableProps) => {
-  const handleFruitAdd = useCallback(
-    (fruit: Fruit) => {
-      onFruitAdd(fruit);
-    },
-    [onFruitAdd]
-  );
-
-  return (
-    <Table>
-      <FruitTableHeader />
-      <TableBody>
-        {fruits.map((fruit) => (
-          <FruitTableRow
-            key={fruit.id}
-            fruit={fruit}
-            onFruitAdd={handleFruitAdd}
-          />
-        ))}
-      </TableBody>
-    </Table>
-  );
-});
+const FruitTableFlat = memo(
+  ({ fruits, onFruitAdd, isNested = false }: FruitTableProps) => {
+    return (
+      <Table>
+        <FruitTableHeader />
+        <TableBody>
+          {fruits.map((fruit) => (
+            <NutrientsPopover key={fruit.id} fruit={fruit}>
+              <TableRow
+                className={cn("cursor-pointer", { "bg-background": isNested })}
+                onClick={() => onFruitAdd(fruit)}
+              >
+                {columns.map((col) => (
+                  <TableCell
+                    key={col.header}
+                    className="w-[0%] last:text-right border-x last:border-r-0 first:border-l-0"
+                  >
+                    {getColumnValue(fruit, col.accessor)}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </NutrientsPopover>
+          ))}
+        </TableBody>
+      </Table>
+    );
+  }
+);
 
 FruitTableFlat.displayName = "FruitTableFlat";
 
